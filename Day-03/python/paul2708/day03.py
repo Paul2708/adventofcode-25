@@ -3,7 +3,7 @@ from requests.cookies import remove_cookie_by_name
 from shared.paul2708.input_reader import *
 from shared.paul2708.output import write
 
-lines = read_plain_input(day=3, example=1)
+lines = read_plain_input(day=3, example=None)
 
 
 def has_chars(l, a, b):
@@ -37,6 +37,8 @@ def next_nums(l, i, rems):
     return res
 
 
+total_removals = len(lines[0]) - 12
+
 ss = 0
 for l in lines:
     removals = 0
@@ -44,25 +46,21 @@ for l in lines:
     r = ""
 
     for i in range(len(l)):
-        if removals == 3:
+        if removals == total_removals:
             r += l[i]
             continue
 
         current = int(l[i])
-        next_n = next_nums(l, i, 3 - removals)
+        next_n = next_nums(l, i, total_removals - removals)
         m = max(next_n + [current])
 
         if m == current:
             # print(f"Keep {current}")
             r += l[i]
         else:
-            if min(next_n + [current]) == current:
-                # print(f"Remove {current}")
-                removals += 1
-            else:
-                r += l[i]
+            removals += 1
 
-    print(r[:12])
+    print(l, r[:12])
     ss += int(r[:12])
 
 print(ss)
