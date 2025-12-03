@@ -1,66 +1,65 @@
-from requests.cookies import remove_cookie_by_name
-
 from shared.paul2708.input_reader import *
 from shared.paul2708.output import write
 
-lines = read_plain_input(day=3, example=None)
+lines = read_plain_input(day=3)
 
 
-def has_chars(l, a, b):
-    if a not in l or b not in l:
+# Part 1
+def contains_a_after_b(line: str, digit_a: str, digit_b: str) -> bool:
+    if digit_a not in line or digit_b not in line:
         return False
 
-    i = l.index(a)
-    j = len(l) - 1 - l[::-1].index(b)
+    a_index = line.index(digit_a)
+    b_index = len(line) - line[::-1].index(digit_b) - 1
 
-    if i < j:
-        return True
-
-    return False
+    return a_index < b_index
 
 
-def smallest_digets(l):
-    nums = list(map(int, l))
-    nums = sorted(nums)
-    return nums[:3]
+joltage = 0
+
+for line in lines:
+    for i in range(99, 9, -1):
+        highest_num = str(i)
+
+        if contains_a_after_b(line, highest_num[0], highest_num[1]):
+            joltage += i
+            break
+
+write(f"The total output joltage is <{joltage}>.")
 
 
-def remove_index(S, Index):
-    return S[:Index] + S[Index + 1:]
+# Part 2
+def look_ahead(line: str, start_index: int, k: int):
+    head = []
 
+    for i in range(1, k + 1):
+        if start_index + i < len(line):
+            head.append(int(line[start_index + i]))
 
-def next_nums(l, i, rems):
-    res = []
-    for k in range(1, rems + 1):
-        if i + k < len(l):
-            res.append(int(l[i + k]))
-    return res
+    return head
 
 
 total_removals = len(lines[0]) - 12
 
-ss = 0
-for l in lines:
+joltage = 0
+
+for line in lines:
     removals = 0
+    largest_joltage = ""
 
-    r = ""
-
-    for i in range(len(l)):
+    for i in range(len(line)):
         if removals == total_removals:
-            r += l[i]
+            largest_joltage += line[i]
             continue
 
-        current = int(l[i])
-        next_n = next_nums(l, i, total_removals - removals)
-        m = max(next_n + [current])
+        current = int(line[i])
+        head = look_ahead(line, i, total_removals - removals)
 
-        if m == current:
-            # print(f"Keep {current}")
-            r += l[i]
+        if current == max(head + [current]):
+            largest_joltage += line[i]
         else:
             removals += 1
 
-    print(l, r[:12])
-    ss += int(r[:12])
+    joltage += int(largest_joltage[:12])
 
-print(ss)
+write(f"The new total output joltage is <{joltage}>.")
