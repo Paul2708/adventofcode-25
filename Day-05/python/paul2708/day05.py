@@ -21,7 +21,6 @@ for line in lines:
     else:
         ids.append(int(line))
 
-
 c = 0
 
 for i in ids:
@@ -30,12 +29,11 @@ for i in ids:
             c += 1
             break
 
-
 clean_id_ranges = []
 clean_id_ranges.append(fresh_id_ranges[0])
 
 
-def merge(clean_a, clean_b, a, b):
+def merge_one(clean_a, clean_b, a, b):
     if clean_a <= a <= b <= clean_b:
         return [(clean_a, clean_b)]
 
@@ -51,27 +49,35 @@ def merge(clean_a, clean_b, a, b):
     return [(a, b), (clean_a, clean_b)]
 
 
-def merge_list(l):
-    result = set()
-    for i in range(len(l)):
-        for j in range(0, len(l)):
-            merged = merge(l[i][0], l[i][1], l[j][0], l[j][1])
-            merged += merge(l[j][0], l[j][1], l[i][0], l[i][1])
-            merged = set(merged)
+def merge(a, b, x, y):
+    return set(merge_one(a, b, x, y) + merge_one(x, y, a, b))
 
-            if (l[i][0], l[i][1]) in result:
+
+def merge_list(l):
+    result = set(l)
+
+    for i in range(len(l)):
+        for j in range(i + 1, len(l)):
+            merged = merge(l[i][0], l[i][1], l[j][0], l[j][1])
+
+            if len(merged) == 1:
                 result.remove((l[i][0], l[i][1]))
-            if (l[j][0], l[j][1]) in result:
                 result.remove((l[j][0], l[j][1]))
 
-            for m in merged:
-                result.add(m)
+                for m in merged:
+                    x = m
+                    result.add(m)
+
+                return result
 
     return result
 
 
 def merge_til_clean(l):
+    print(f"Start {l}")
     merged = merge_list(l)
+
+    print(f"Merged: {merged}")
 
     if set(merged) == set(l):
         return merged
@@ -81,6 +87,8 @@ def merge_til_clean(l):
 
 res = merge_til_clean(fresh_id_ranges)
 
+print(res)
+
 total = 0
 
 for a, b in res:
@@ -88,11 +96,9 @@ for a, b in res:
 
 print(total)
 
-#clean_res = []
-#clean_res.append(fresh_id_ranges[0])
+# clean_res = []
+# clean_res.append(fresh_id_ranges[0])
 
-#for i in range(1, len(fresh_id_ranges)):
+# for i in range(1, len(fresh_id_ranges)):
 #    a = fresh_id_ranges[i]
 
-
-# To high: 1043087815449996
