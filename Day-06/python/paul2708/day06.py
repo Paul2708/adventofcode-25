@@ -1,83 +1,78 @@
-import itertools
-from typing import List, Optional, Tuple
+import math
+from typing import List
 
 from shared.paul2708.input_reader import *
 from shared.paul2708.output import write
-from shared.paul2708.utility import copy_list, transpose
+from shared.paul2708.utility import transpose
 
-trimmed_grid = [[k for k in line.strip().split(" ") if k != ""] for line in read_plain_input(day=6, example=None)]
+lines = read_plain_input(day=6)
 
-print("Trimmed")
-print(trimmed_grid)
+# Part 1
+stripped_grid = [[k for k in line.strip().split(" ") if k != ""] for line in lines]
 
-grid = [line for line in read_plain_input(day=6, example=None)]
-print("Grid")
-grid.remove(grid[-1])
-print(grid)
+total = 0
+for j in range(len(stripped_grid[0])):
+    nums = []
+
+    for i in range(len(stripped_grid)):
+        current = stripped_grid[i][j]
+
+        if current == "+":
+            total += sum(nums)
+        elif current == "*":
+            total += math.prod(nums)
+        else:
+            nums.append(int(current))
+
+write(f"The grant total is <{total}>.")
 
 
-def split_numbers(line: str, max_lengths):
-    splitted = []
+# Part 2
+def split_numbers(line: str, max_lengths: List[int]) -> List[str]:
+    numbers = []
     curr = ""
 
     for i in range(len(line)):
-        if len(curr) < max_lengths[len(splitted)]:
+        if len(curr) < max_lengths[len(numbers)]:
             curr += line[i]
         else:
-            splitted.append(curr)
+            numbers.append(curr)
             curr = ""
 
-    while len(curr) < max_lengths[-1]:
-        curr += " "
-
-    splitted.append(curr)
-
-    return splitted
+    numbers.append(curr)
+    return numbers
 
 
-def get_longest_word(i):
-    return max(list(map(len, transpose(trimmed_grid)[i])))
+def get_longest_word_in_column(column: int) -> int:
+    return max(list(map(len, transpose(stripped_grid)[column])))
 
 
-fixed_grid = []
-for i in range(len(grid)):
-    fixed_grid.append(split_numbers(grid[i], [get_longest_word(j) for j in range(len(transpose(trimmed_grid)))]))
-
-print(fixed_grid)
-print(list(map(list, zip(*fixed_grid))))
-
-
-def transform_numbers(nums):
+def transform_numbers(nums: List[str]) -> List[int]:
     max_length = max([len(num) for num in nums])
 
-    res = []
+    transformed = []
     for i in range(max_length):
-
         digits = ""
 
         for num in nums:
-            if 0 <= i < len(num):
-                digits += num[-i - 1]
+            digits += num[i]
 
-        res.append(int(digits))
+        transformed.append(int(digits))
 
-    return res
+    return transformed
 
 
-print("==")
-t = 0
+intended_grid = []
+for i in range(len(lines) - 1):
+    max_lengths = [get_longest_word_in_column(j) for j in range(len(transpose(stripped_grid)))]
 
-for i, col in enumerate(transpose(fixed_grid)):
-    print(col)
-    print(transform_numbers(col))
-    print(trimmed_grid[-1][i])
+    intended_grid.append(split_numbers(lines[i], max_lengths))
 
-    if trimmed_grid[-1][i] == "+":
-        t += sum(transform_numbers(col))
+total = 0
+for i, col in enumerate(transpose(intended_grid)):
+    if stripped_grid[-1][i] == "+":
+        total += sum(transform_numbers(col))
     else:
-        a = 1
-        for k in transform_numbers(col):
-            a *= k
-        t += a
+        total += math.prod(transform_numbers(col))
 
-print(t)
+write(f"The grant total using right-to-left in columns is <{total}>.")
